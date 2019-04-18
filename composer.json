@@ -1,0 +1,24 @@
+{
+    "name": "9peak/db",
+    "description": "SQL DB Component for PHP, including SQL builder, PDO and PDOStatement.",
+    "license": "MIT",
+    "keywords": ["9peak", "php", "db", "sql"],
+    "authors": [
+        {
+            "name": "Kane Young / 杨祥凯",
+            "email": "52653784@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">= 5.3",
+        "9peak/php-plugin": "^1.1.6"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Peak\\DB\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": false
+}
