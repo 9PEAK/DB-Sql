@@ -1,9 +1,9 @@
 <?php
 
-namespace Peak\Plugin\DB\SQL;
+namespace Peak\DB\SQL;
 
-use Peak\Plugin\DB\Core;
-use Peak\Plugin\DB\Query;
+use Peak\DB\Core;
+use Peak\DB\Query;
 
 trait Insert
 {

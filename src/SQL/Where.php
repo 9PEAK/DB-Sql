@@ -1,8 +1,8 @@
 <?php
 
-namespace Peak\Plugin\DB\SQL;
+namespace Peak\DB\SQL;
 
-use Peak\Plugin\DB\Core;
+use Peak\DB\Core;
 
 trait Where
 {
