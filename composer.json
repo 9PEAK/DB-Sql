@@ -1,5 +1,5 @@
 {
-    "name": "9peak/db",
+    "name": "9peak/db-sql",
     "description": "SQL DB Component for PHP, including SQL builder, PDO and PDOStatement.",
     "license": "MIT",
     "keywords": ["9peak", "php", "db", "sql"],
