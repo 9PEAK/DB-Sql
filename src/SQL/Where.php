@@ -2,8 +2,6 @@
 
 namespace Peak\DB\SQL;
 
-use Peak\DB\Core;
-
 trait Where
 {
 
@@ -49,7 +47,7 @@ trait Where
 			return self::null($key);
 		}
 
-		Core::setParam([
+		Common::bind([
 			$key => $val
 		]);
 		return self::raw($key, '?');
@@ -65,7 +63,7 @@ trait Where
 	 * */
 	static function like ($key, $val, $not=false)
 	{
-		Query::bind([
+		Common::bind([
 			$key => $val
 		]);
 		return self::raw($key, $val, $not ? 'not like' : 'like');

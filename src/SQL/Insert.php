@@ -2,9 +2,6 @@
 
 namespace Peak\DB\SQL;
 
-use Peak\DB\Core;
-use Peak\DB\Query;
-
 trait Insert
 {
 
@@ -28,7 +25,7 @@ trait Insert
 
 		if (count($dat)==count($dat,1) ) {
 			// 绑定并生成sql语句
-			$n = Core::setParam($dat);
+			$n = Common::bind($dat);
 			$dat = array_fill (0 , $n , '?' ) ;
 			$dat = join ( ',' , $dat ) ;
 			$dat = '('.$dat.')' ;

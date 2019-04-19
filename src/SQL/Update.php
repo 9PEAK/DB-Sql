@@ -26,7 +26,7 @@ trait Update
 	static function set (array $dat)
 	{
 		if ($dat) {
-			$n = Core::setParam($dat);
+			$n = Common::bind($dat);
 			foreach ($dat as $k=>&$v) {
 				$v = $k.'=?';
 			}

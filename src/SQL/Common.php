@@ -8,6 +8,32 @@ trait Common
 {
 
 
+	static $bind = [];
+
+
+	/**
+	 * 设置绑定查询参数
+	 * @param $dat string 加入查询的变量
+	 * @param $reset bool 是否重置绑定的值
+	 * @return int 加入变量的总数
+	 * */
+	static function bind (array $param=[], $reset=false)
+	{
+
+		$reset && self::$bind = [];
+
+		$n = count(self::$bind);
+		foreach ($param as $k=>$v) {
+			is_array($v) ? self::{__FUNCTION__}($v) : self::$bind[]=$v;
+		}
+
+		$n = count(self::$bind)-$n;
+		return $n>0 ? $n : 0;
+	}
+
+
+
+
 	/**
 	 * 构造IN语句
 	 * @param $key string 字段名
@@ -17,7 +43,7 @@ trait Common
 	static function in ($key, array $val, $bind=true) {
 		$sql = $key.' in (';
 		if ($bind) {
-			$n = Query::bind($val);
+			$n = Common::bind($val);
 			$val = array_fill(0, $n, '?');
 		}
 		$sql.= join(',', $val);

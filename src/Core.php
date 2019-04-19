@@ -29,36 +29,16 @@ class Core
 
 
 
-
-	protected static $statement_param = [];
-
-	/**
-	 * 设置绑定查询参数
-	 * @param $dat string 加入查询的变量 默认为空 清空查询值
-	 * @return int 加入变量的总数。
-	 * */
-	static function setParam (array $param=[])
-	{
-		$n = count(self::$statement_param);
-		foreach ($param as $k=>$v) {
-			is_array($v) ? self::{__FUNCTION__}(self::$statement_param, $v) : self::$statement_param[]=$v;
-		}
-		$param || self::$statement_param=[];
-
-		$n = count(self::$statement_param)-$n;
-		return $n>0 ? $n : 0;
-	}
-
-
 	/**
 	 * 执行SQL查询
 	 * @param $sql string 查询语句
+	 * @param $param array 绑定的查询参数
 	 * @return object PDO::Statement
 	 * */
-	final protected static function query ($sql)
+	final protected static function query ($sql, array $param)
 	{
-		$param = self::$statement_param;
-		self::setParam([]);
+//		$param = $param ?: SQL\Common::$bind;
+//		self::setParam([]);
 		return Query::exec($sql, $param) ?: self::debug(Query::debug());
 	}
 
@@ -68,12 +48,13 @@ class Core
 	/**
 	 * 新增
 	 * @param $sql string 查询语句
+	 * @param $param array 查询参数
 	 * @param $lastId bool 是否返回自增id值
 	 * @return mixed 成功失败返回boolean值，如果$lastId为true，则返回int
 	 * */
-	static function create ($sql, $lastId=false)
+	static function create ($sql, array $param=[], $lastId=false)
 	{
-		$sth = self::query($sql);
+		$sth = self::query($sql, $param);
 		if ($sth) {
 			if ($lastId) {
 				return self::createdId();
@@ -115,6 +96,9 @@ class Core
 	}
 
 
+	/*
+
+
 	static function update ($sql)
 	{
 		return (bool)self::query($sql);
@@ -125,20 +109,10 @@ class Core
 	{
 		return (bool)self::query($sql);
 	}
+*/
 
 
 
-
-
-	// 执行delete语句
-//	static function delete ( $table , $where ) {
-//
-//		$sql = 'delete from '.$table ;
-//		$sql.= ' where ' .self::where_and($where) ;
-//
-//		return self ::query ( $sql ) ;
-//
-//	}
 
 
 	static function transact (\Closure $func)
@@ -163,10 +137,10 @@ class Core
 		$pdo = Query::pdo();
 		switch ($step ) {
 			case 0:
-				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT) ,'<br>' ;
+//				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT) ,'<br>' ;
 				$pdo->beginTransaction() ;
 				$pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT, 0);
-				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT);
+//				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT);
 				break;
 
 			case '':
