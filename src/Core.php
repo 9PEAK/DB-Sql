@@ -5,13 +5,15 @@ namespace Peak\DB;
 class Core
 {
 
-	static function connect ($type='mysql')
+	use \Peak\Plugin\Debuger\Base;
+
+	protected static $pdo;
+
+	static function connect (\PDO $pdo)
 	{
-		Query::pdo(Connector::init($type));
+		self::$pdo = $pdo;
 	}
 
-//	static $debug_on = true ;
-//	static $debug_error = [] ;
 
 
 	/* sql查询错误返回
@@ -25,8 +27,6 @@ class Core
 //	}
 
 
-	use \Peak\Plugin\Debuger\Base;
-
 
 
 	/**
@@ -35,11 +35,28 @@ class Core
 	 * @param $param array 绑定的查询参数
 	 * @return object PDO::Statement
 	 * */
-	final protected static function query ($sql, array $param)
+	final static function query ($sql, array $param=[])
 	{
-//		$param = $param ?: SQL\Common::$bind;
-//		self::setParam([]);
-		return Query::exec($sql, $param) ?: self::debug(Query::debug());
+
+		$sth = self::$pdo->prepare($sql);
+
+		foreach ($param as $i=>$val ) {
+			if (is_int($val)) {
+				$type = \PDO::PARAM_INT;
+			} elseif (is_null($val)) {
+				$type = \PDO::PARAM_NULL;
+			} else {
+				$type = \PDO::PARAM_STR ;
+			}
+			$sth->bindValue($i+1, $val , $type) ;
+		}
+
+
+		if (!$sth->execute()) {
+			return self::debug($sth->errorInfo());
+		}
+
+		return $sth;
 	}
 
 
@@ -82,7 +99,7 @@ class Core
 	 * */
 	static function read ($sql, $single=true, $type='assoc')
 	{
-		$sth = self::query($sql);
+		$sth = self::query($sql, SQL\Common::$bind);
 		if (!$sth) return false;
 
 		if (is_string($type)) {
@@ -114,31 +131,17 @@ class Core
 
 
 
-
-	static function transact (\Closure $func)
-	{
-		self::transaction();
-		try {
-			$res = $func();
-			self::transaction(1);
-			return $res;
-		} catch (\Exception $e) {
-			self::transaction(-1);
-			return $e;
-		}
-	}
-
 	/**
 	 * 表事务
 	 * @param $step int 0或''开始，1或'+'提交，-1或'-'回滚。
 	 * */
 	static function transaction ($step=0)
 	{
-		$pdo = Query::pdo();
-		switch ($step ) {
+		$pdo = self::$pdo;
+		switch ($step) {
 			case 0:
 //				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT) ,'<br>' ;
-				$pdo->beginTransaction() ;
+				$pdo->beginTransaction();
 				$pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT, 0);
 //				echo $pdo->getAttribute(\PDO::ATTR_AUTOCOMMIT);
 				break;
@@ -170,7 +173,25 @@ class Core
 	}
 
 
-	// 关闭事务
+
+	/**
+	 * 表事务
+	 * @param $func 闭包函数
+	 * */
+	static function transact (\Closure $func)
+	{
+		self::transaction();
+		try {
+			$res = $func();
+			self::transaction(1);
+			return $res;
+		} catch (\Exception $e) {
+			self::transaction(-1);
+			return $e;
+		}
+	}
+
+
 
 
 ////////////////// 不常用部分 未测试  /////////////////////////
@@ -197,20 +218,6 @@ class Core
 	static function count ( $tb , $where=null ) {
 		$res = self::select ( $tb , 'count(*)' , $where ) ;
 		return $res['count(*)'] ;
-	}
-
-
-	// 组织select语句
-	static function sqlSelect ( $tb , $field='*' , $where=null ) {
-
-		$field = is_array($field) ? join( ',' , $field ) : $field ;
-		$tb = is_array($tb) ? join( ',' , $tb ) : $tb ;
-		$where = self::where_and($where) ;
-
-		$sql = 'select '.$field.' from '.$tb;
-		$sql.= $where ? ' where ' .$where : ' ' ;
-
-		return $sql ;
 	}
 
 
